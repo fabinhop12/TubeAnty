@@ -1,0 +1,54 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  createdAt DateTime  @default(now())
+  profiles  Profile[]
+}
+
+// SQLite nao suporta enum nativo no Prisma; "HTTP" | "HTTPS" | "SOCKS5"
+// e validado na camada de app (ver packages/shared ProxyProtocol).
+model Proxy {
+  id             String     @id @default(cuid())
+  label          String
+  protocol       String
+  host           String
+  port           Int
+  username       String?
+  passwordCipher String?
+  rotationUrl    String?
+  lastIp         String?
+  lastLatencyMs  Int?
+  lastCheckAt    DateTime?
+  profiles       Profile[]
+  createdAt      DateTime   @default(now())
+}
+
+model Profile {
+  id             String    @id @default(cuid())
+  name           String
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  proxyId        String?
+  proxy          Proxy?    @relation(fields: [proxyId], references: [id])
+  userDataDir    String
+  timezone       String?
+  locale         String?
+  userAgent      String?
+  viewportWidth  Int       @default(1366)
+  viewportHeight Int       @default(768)
+  notes          String?
+  lastOpenedAt   DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([userId])
+}

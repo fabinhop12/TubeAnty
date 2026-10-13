@@ -1,0 +1,20 @@
+node_modules/
+dist/
+dist-electron/
+out/
+release/
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# SQLite local data
+apps/desktop/prisma/*.db
+apps/desktop/prisma/*.db-journal
+apps/desktop/tubeanty.db
+
+# profile session data (user-data-dir per browser profile)
+apps/desktop/profiles-data/
+
+.DS_Store

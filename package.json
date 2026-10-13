@@ -1,0 +1,19 @@
+{
+  "name": "tubeanty",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Gerenciador de multiplos perfis de navegador com proxy isolado, focado em contas de YouTube.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/desktop",
+    "build": "npm run build -w apps/desktop",
+    "prisma:generate": "npm run prisma:generate -w apps/desktop",
+    "prisma:migrate": "npm run prisma:migrate -w apps/desktop"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

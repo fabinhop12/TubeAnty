@@ -3,7 +3,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import type { ProxyInput, ProxyTestResult } from "@tubeanty/shared";
 
-type ProxyAgentLike = Pick<ProxyInput, "protocol" | "host" | "port" | "username" | "password">;
+export type ProxyAgentLike = Pick<ProxyInput, "protocol" | "host" | "port" | "username" | "password">;
 
 interface GeoLookup {
   ip: string;
@@ -16,7 +16,7 @@ interface GeoLookup {
  * com a geolocalizacao do proxy. Nao e exaustivo; o usuario pode editar o
  * valor sugerido na UI.
  */
-const COUNTRY_TO_LOCALE: Record<string, string> = {
+export const COUNTRY_TO_LOCALE: Record<string, string> = {
   BR: "pt-BR",
   PT: "pt-PT",
   US: "en-US",
@@ -38,7 +38,7 @@ const COUNTRY_TO_LOCALE: Record<string, string> = {
   TR: "tr-TR",
 };
 
-function buildProxyUrl(input: ProxyAgentLike): string {
+export function buildProxyUrl(input: ProxyAgentLike): string {
   const auth = input.username
     ? `${encodeURIComponent(input.username)}:${encodeURIComponent(input.password ?? "")}@`
     : "";

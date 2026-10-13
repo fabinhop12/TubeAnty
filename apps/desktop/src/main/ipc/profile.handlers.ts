@@ -1,5 +1,6 @@
 import { app, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
+import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import type { Profile as ProfileRow, Proxy as ProxyRow } from "@prisma/client";
 import { IpcChannels } from "@tubeanty/shared";
@@ -101,7 +102,10 @@ export function registerProfileHandlers(): void {
   );
 
   ipcMain.handle(IpcChannels.profiles.delete, async (_event, id: string): Promise<void> => {
-    await prisma.profile.delete({ where: { id } });
+    const row = await prisma.profile.delete({ where: { id } });
+    // Remove tambem a pasta de dados do navegador (cookies/sessao); senao
+    // fica orfa no disco, inacessivel, para sempre.
+    await rm(row.userDataDir, { recursive: true, force: true });
   });
 
   ipcMain.handle(IpcChannels.profiles.open, async (_event, id: string): Promise<LaunchResult> => {

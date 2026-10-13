@@ -76,8 +76,10 @@ export function ProfilesPage() {
     await refresh();
   }
 
-  async function handleDelete(id: string) {
-    await window.api.profiles.delete(id);
+  async function handleDelete(profile: Profile) {
+    if (!confirm(`Remover o perfil "${profile.name}"? Isso tambem apaga os dados de sessao (cookies) salvos dele.`))
+      return;
+    await window.api.profiles.delete(profile.id);
     await refresh();
   }
 
@@ -284,7 +286,7 @@ export function ProfilesPage() {
                   <Button variant="ghost" onClick={() => handleDuplicate(profile)}>
                     Duplicar
                   </Button>
-                  <Button variant="destructive" onClick={() => handleDelete(profile.id)}>
+                  <Button variant="destructive" onClick={() => handleDelete(profile)}>
                     Remover
                   </Button>
                 </div>

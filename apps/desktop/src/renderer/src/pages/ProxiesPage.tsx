@@ -44,8 +44,9 @@ export function ProxiesPage() {
     if (!result.ok) alert(`Falha ao rotacionar IP: ${result.error ?? "desconhecida"}`);
   }
 
-  async function handleDelete(id: string) {
-    await window.api.proxies.delete(id);
+  async function handleDelete(proxy: Proxy) {
+    if (!confirm(`Remover o proxy "${proxy.label}"? Perfis que o usam ficarao sem proxy.`)) return;
+    await window.api.proxies.delete(proxy.id);
     await refresh();
   }
 
@@ -132,7 +133,7 @@ export function ProxiesPage() {
                   <Button variant="outline" disabled={testingId === proxy.id} onClick={() => handleTest(proxy)}>
                     {testingId === proxy.id ? "Testando..." : "Testar"}
                   </Button>
-                  <Button variant="destructive" onClick={() => handleDelete(proxy.id)}>
+                  <Button variant="destructive" onClick={() => handleDelete(proxy)}>
                     Remover
                   </Button>
                 </div>

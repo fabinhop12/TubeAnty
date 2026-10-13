@@ -1,0 +1,46 @@
+appId: com.tubeanty.desktop
+productName: TubeAnty
+# Workspaces do npm hospedam electron em node_modules na raiz do monorepo;
+# o auto-detect do electron-builder so olha node_modules deste pacote, por
+# isso fixamos a versao aqui (mantida em sincronia com o devDependency
+# "electron" do package.json deste app).
+electronVersion: 32.3.3
+# Este e um monorepo com npm workspaces: node_modules fica hospedado na raiz,
+# nao dentro de apps/desktop. O passo automatico do electron-builder que
+# tenta "sincronizar" node_modules de producao nao entende esse hoisting e
+# acaba podando devDependencies da raiz (incluindo as proprias ferramentas
+# do electron-builder). Desligamos esse passo; o node_modules hospedado ja
+# e usado como esta.
+npmRebuild: false
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+  # node_modules/.prisma (diretorio com ponto) nao e varrido pelo glob
+  # default do electron-builder; precisa ser listado explicitamente aqui,
+  # alem de entrar no asarUnpack abaixo.
+  - node_modules/.prisma/**/*
+# Prisma Client gera um binario nativo (query engine) por plataforma dentro
+# de node_modules/.prisma e node_modules/@prisma/client. Esses arquivos tem
+# que ficar fora do asar, senao o processo main nao consegue executa-los
+# em runtime.
+asarUnpack:
+  - node_modules/.prisma/**/*
+  - node_modules/@prisma/client/**/*
+extraResources:
+  - from: prisma/schema.prisma
+    to: prisma/schema.prisma
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Network
+mac:
+  target:
+    - dmg
+  category: public.app-category.utilities
+win:
+  target:
+    - nsis

@@ -2,6 +2,8 @@
   "name": "@tubeanty/desktop",
   "private": true,
   "version": "0.1.0",
+  "description": "Gerenciador de perfis de navegador com proxy isolado por perfil, focado em contas de YouTube.",
+  "author": "TubeAnty",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -9,17 +11,22 @@
     "preview": "electron-vite preview",
     "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev --name init"
+    "prisma:migrate": "prisma migrate dev --name init",
+    "dist": "bash scripts/dist.sh",
+    "dist:linux": "bash scripts/dist.sh --linux",
+    "dist:win": "bash scripts/dist.sh --win",
+    "dist:mac": "bash scripts/dist.sh --mac",
+    "dist:dir": "bash scripts/dist.sh --dir"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
-    "@tubeanty/shared": "*",
     "https-proxy-agent": "^7.0.5",
     "playwright-core": "^1.47.0",
     "socks-proxy-agent": "^8.0.4",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@tubeanty/shared": "*",
     "@types/node": "^22.7.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
@@ -27,6 +34,7 @@
     "autoprefixer": "^10.4.20",
     "clsx": "^2.1.1",
     "electron": "^32.1.2",
+    "electron-builder": "^25.1.8",
     "electron-vite": "^2.3.0",
     "postcss": "^8.4.47",
     "prisma": "^5.20.0",

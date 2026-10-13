@@ -1,9 +1,13 @@
 {
-  "name": "@tubeanty/desktop",
+  "name": "tubeanty-desktop",
   "private": true,
   "version": "0.1.0",
   "description": "Gerenciador de perfis de navegador com proxy isolado por perfil, focado em contas de YouTube.",
-  "author": "TubeAnty",
+  "author": {
+    "name": "TubeAnty",
+    "email": "fabinhop12@gmail.com"
+  },
+  "homepage": "https://github.com/fabinhop12/TubeAnty",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",

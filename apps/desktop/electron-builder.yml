@@ -1,5 +1,9 @@
 appId: com.tubeanty.desktop
 productName: TubeAnty
+# Sem canal de auto-update configurado (nenhum servidor/GitHub releases por
+# tras do app ainda); sem isso, o electron-builder tenta gerar metadados de
+# update (latest-linux.yml etc.) e quebra por falta de canal.
+publish: null
 # Workspaces do npm hospedam electron em node_modules na raiz do monorepo;
 # o auto-detect do electron-builder so olha node_modules deste pacote, por
 # isso fixamos a versao aqui (mantida em sincronia com o devDependency
@@ -18,25 +22,36 @@ directories:
 files:
   - out/**/*
   - package.json
-  # node_modules/.prisma (diretorio com ponto) nao e varrido pelo glob
-  # default do electron-builder; precisa ser listado explicitamente aqui,
-  # alem de entrar no asarUnpack abaixo.
-  - node_modules/.prisma/**/*
-# Prisma Client gera um binario nativo (query engine) por plataforma dentro
-# de node_modules/.prisma e node_modules/@prisma/client. Esses arquivos tem
-# que ficar fora do asar, senao o processo main nao consegue executa-los
-# em runtime.
+  # node_modules/@prisma/client entra pelo detector de dependencias padrao
+  # do electron-builder (resolve "dependencies" do package.json). Mas
+  # node_modules/.prisma NAO e um pacote com seu proprio package.json —
+  # e um diretorio gerado em runtime pelo `prisma generate` — entao esse
+  # detector nunca o descobre e um simples padrao de string e ignorado.
+  # A entrada {from, to} abaixo e mesclada diretamente na raiz do pacote
+  # (nao e so um glob sobre a selecao automatica), colocando node_modules/
+  # .prisma como vizinho real de node_modules/@prisma/client, exatamente
+  # onde o require('.prisma/client/...') interno do @prisma/client espera
+  # encontra-lo.
+  - from: node_modules/.prisma
+    to: node_modules/.prisma
+# O binario nativo do engine (.node) dentro de node_modules/.prisma/client
+# nao pode ser carregado de dentro do asar; o Electron resolve isso de forma
+# transparente quando o arquivo esta marcado aqui para ficar fora do asar
+# (app.asar.unpacked), sem precisar de nenhum ajuste de runtime.
 asarUnpack:
-  - node_modules/.prisma/**/*
   - node_modules/@prisma/client/**/*
+  - node_modules/.prisma/**/*
 extraResources:
   - from: prisma/schema.prisma
     to: prisma/schema.prisma
+artifactName: "${productName}-${version}-${arch}.${ext}"
 linux:
   target:
     - AppImage
     - deb
   category: Network
+  maintainer: "TubeAnty <fabinhop12@gmail.com>"
+  executableName: tubeanty
 mac:
   target:
     - dmg

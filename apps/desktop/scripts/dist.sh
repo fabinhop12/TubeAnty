@@ -7,11 +7,14 @@
 # essa copia ao final — ela nunca deve ficar parada aqui fora de um build,
 # senao passa a mascarar o node_modules hoisted real durante `npm run dev`.
 #
-# O escopo @tubeanty e excluido da copia: @tubeanty/shared ja vai inlinado
-# no bundle (nao e mais require()ado em runtime, ver electron.vite.config.ts)
-# e @tubeanty/desktop e um symlink deste proprio pacote de volta pra si
-# mesmo (node_modules/@tubeanty/desktop -> apps/desktop) — copiar com
-# dereference entraria em recursao infinita.
+# node_modules/@tubeanty/shared e excluido da copia: ja vai inlinado no
+# bundle (nao e mais require()ado em runtime, ver electron.vite.config.ts).
+# node_modules/tubeanty-desktop e excluido porque e um symlink deste
+# proprio pacote de volta pra si mesmo (-> apps/desktop) — copiar isso
+# entraria em recursao infinita. Os demais symlinks (ex: node_modules/.bin/*)
+# sao preservados como symlinks, nao dereferenciados: seus alvos sao
+# relativos e continuam validos na copia, e dereferenciar quebraria os
+# requires relativos desses shims (ex: electron-builder).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -23,7 +26,7 @@ if [ -e node_modules ]; then
 fi
 
 mkdir -p node_modules
-tar -C ../../node_modules --exclude='@tubeanty' -chf - . | tar -C node_modules -xf -
+tar -C ../../node_modules --exclude='@tubeanty' --exclude='tubeanty-desktop' -cf - . | tar -C node_modules -xf -
 
 cleanup() {
   rm -rf node_modules

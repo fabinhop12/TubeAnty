@@ -28,6 +28,9 @@ model Proxy {
   rotationUrl    String?
   lastIp         String?
   lastLatencyMs  Int?
+  lastCountryCode String?
+  lastTimezone    String?
+  lastLocale      String?
   lastCheckAt    DateTime?
   profiles       Profile[]
   createdAt      DateTime   @default(now())
@@ -40,6 +43,7 @@ model Profile {
   user           User      @relation(fields: [userId], references: [id])
   proxyId        String?
   proxy          Proxy?    @relation(fields: [proxyId], references: [id])
+  group          String?
   userDataDir    String
   timezone       String?
   locale         String?

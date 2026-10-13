@@ -12,6 +12,9 @@ export interface Proxy {
   rotationUrl: string | null;
   lastIp: string | null;
   lastLatencyMs: number | null;
+  lastCountryCode: string | null;
+  lastTimezone: string | null;
+  lastLocale: string | null;
   lastCheckAt: string | null;
   createdAt: string;
 }
@@ -30,6 +33,9 @@ export interface ProxyTestResult {
   ok: boolean;
   ip?: string;
   latencyMs?: number;
+  countryCode?: string;
+  timezone?: string;
+  locale?: string;
   error?: string;
 }
 
@@ -38,6 +44,7 @@ export interface Profile {
   name: string;
   userId: string;
   proxyId: string | null;
+  group: string | null;
   userDataDir: string;
   timezone: string | null;
   locale: string | null;
@@ -52,6 +59,7 @@ export interface Profile {
 export interface ProfileInput {
   name: string;
   proxyId?: string | null;
+  group?: string | null;
   timezone?: string | null;
   locale?: string | null;
   userAgent?: string | null;

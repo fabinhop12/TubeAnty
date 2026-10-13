@@ -19,6 +19,9 @@ function toDto(row: ProxyRow): Proxy {
     rotationUrl: row.rotationUrl,
     lastIp: row.lastIp,
     lastLatencyMs: row.lastLatencyMs,
+    lastCountryCode: row.lastCountryCode,
+    lastTimezone: row.lastTimezone,
+    lastLocale: row.lastLocale,
     lastCheckAt: row.lastCheckAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
   };
@@ -82,6 +85,9 @@ export function registerProxyHandlers(): void {
           data: {
             lastIp: result.ip ?? null,
             lastLatencyMs: result.latencyMs ?? null,
+            lastCountryCode: result.countryCode ?? null,
+            lastTimezone: result.timezone ?? null,
+            lastLocale: result.locale ?? null,
             lastCheckAt: new Date(),
           },
         });

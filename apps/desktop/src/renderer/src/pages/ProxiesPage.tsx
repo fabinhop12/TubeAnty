@@ -120,21 +120,31 @@ export function ProxiesPage() {
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>{proxy.lastIp ? `IP: ${proxy.lastIp} (${proxy.lastLatencyMs}ms)` : "Nunca testado"}</span>
-              <div className="flex gap-2">
-                {proxy.rotationUrl && (
-                  <Button variant="outline" onClick={() => handleRotate(proxy)}>
-                    Rotacionar IP
+            <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
+              <div className="flex items-center justify-between">
+                <span>{proxy.lastIp ? `IP: ${proxy.lastIp} (${proxy.lastLatencyMs}ms)` : "Nunca testado"}</span>
+                <div className="flex gap-2">
+                  {proxy.rotationUrl && (
+                    <Button variant="outline" onClick={() => handleRotate(proxy)}>
+                      Rotacionar IP
+                    </Button>
+                  )}
+                  <Button variant="outline" disabled={testingId === proxy.id} onClick={() => handleTest(proxy)}>
+                    {testingId === proxy.id ? "Testando..." : "Testar"}
                   </Button>
-                )}
-                <Button variant="outline" disabled={testingId === proxy.id} onClick={() => handleTest(proxy)}>
-                  {testingId === proxy.id ? "Testando..." : "Testar"}
-                </Button>
-                <Button variant="destructive" onClick={() => handleDelete(proxy.id)}>
-                  Remover
-                </Button>
+                  <Button variant="destructive" onClick={() => handleDelete(proxy.id)}>
+                    Remover
+                  </Button>
+                </div>
               </div>
+              {proxy.lastTimezone && (
+                <div className="flex gap-2">
+                  <Badge tone="neutral">{proxy.lastCountryCode}</Badge>
+                  <Badge tone="neutral">{proxy.lastTimezone}</Badge>
+                  {proxy.lastLocale && <Badge tone="neutral">{proxy.lastLocale}</Badge>}
+                  <span className="text-xs">sugestao de timezone/idioma para perfis deste proxy</span>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}

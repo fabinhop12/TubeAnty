@@ -13,6 +13,7 @@ function toDto(row: ProfileRow): Profile {
     name: row.name,
     userId: row.userId,
     proxyId: row.proxyId,
+    group: row.group,
     userDataDir: row.userDataDir,
     timezone: row.timezone,
     locale: row.locale,
@@ -65,6 +66,7 @@ export function registerProfileHandlers(): void {
         name: input.name,
         userId: user.id,
         proxyId: input.proxyId ?? null,
+        group: input.group ?? null,
         userDataDir,
         timezone: input.timezone ?? null,
         locale: input.locale ?? null,
@@ -85,6 +87,7 @@ export function registerProfileHandlers(): void {
         data: {
           ...(input.name !== undefined && { name: input.name }),
           ...(input.proxyId !== undefined && { proxyId: input.proxyId }),
+          ...(input.group !== undefined && { group: input.group }),
           ...(input.timezone !== undefined && { timezone: input.timezone }),
           ...(input.locale !== undefined && { locale: input.locale }),
           ...(input.userAgent !== undefined && { userAgent: input.userAgent }),

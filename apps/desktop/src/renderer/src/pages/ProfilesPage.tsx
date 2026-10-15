@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Profile, ProfileInput, Proxy } from "@tubeanty/shared";
+import type { Profile, ProfileInput, Proxy, YoutubeAccount } from "@tubeanty/shared";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -9,11 +9,19 @@ const ALL_GROUPS = "__all__";
 
 type EditState = ProfileInput & { id: string };
 
+const numberFormatter = new Intl.NumberFormat("pt-BR");
+
+function formatCount(value: number | null): string {
+  return value === null ? "—" : numberFormatter.format(value);
+}
+
 export function ProfilesPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [proxies, setProxies] = useState<Proxy[]>([]);
+  const [youtubeAccounts, setYoutubeAccounts] = useState<Record<string, YoutubeAccount | null>>({});
   const [form, setForm] = useState<ProfileInput>(emptyForm);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [youtubeBusyId, setYoutubeBusyId] = useState<string | null>(null);
   const [groupFilter, setGroupFilter] = useState<string>(ALL_GROUPS);
   const [editing, setEditing] = useState<EditState | null>(null);
 
@@ -21,6 +29,10 @@ export function ProfilesPage() {
     const [profileRows, proxyRows] = await Promise.all([window.api.profiles.list(), window.api.proxies.list()]);
     setProfiles(profileRows);
     setProxies(proxyRows);
+    const accountEntries = await Promise.all(
+      profileRows.map(async (profile) => [profile.id, await window.api.youtube.getAccount(profile.id)] as const),
+    );
+    setYoutubeAccounts(Object.fromEntries(accountEntries));
   }
 
   useEffect(() => {
@@ -113,6 +125,30 @@ export function ProfilesPage() {
     const { id, ...input } = editing;
     await window.api.profiles.update(id, input);
     setEditing(null);
+    await refresh();
+  }
+
+  async function handleConnectYoutube(profile: Profile) {
+    setYoutubeBusyId(profile.id);
+    const result = await window.api.youtube.connect(profile.id);
+    setYoutubeBusyId(null);
+    if (!result.ok) alert(`Falha ao conectar com o YouTube: ${result.error ?? "desconhecida"}`);
+    await refresh();
+  }
+
+  async function handleRefreshYoutubeStats(profile: Profile) {
+    setYoutubeBusyId(profile.id);
+    const result = await window.api.youtube.refreshStats(profile.id);
+    setYoutubeBusyId(null);
+    if (!result.ok) alert(`Falha ao atualizar estatisticas: ${result.error ?? "desconhecida"}`);
+    await refresh();
+  }
+
+  async function handleDisconnectYoutube(profile: Profile) {
+    const account = youtubeAccounts[profile.id];
+    if (!account) return;
+    if (!confirm(`Desconectar o canal "${account.channelTitle}" deste perfil?`)) return;
+    await window.api.youtube.disconnect(profile.id);
     await refresh();
   }
 
@@ -252,6 +288,9 @@ export function ProfilesPage() {
             );
           }
 
+          const youtubeAccount = youtubeAccounts[profile.id];
+          const youtubeBusy = youtubeBusyId === profile.id;
+
           return (
             <Card key={profile.id}>
               <CardHeader>
@@ -263,32 +302,71 @@ export function ProfilesPage() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>
-                  {profile.lastOpenedAt
-                    ? `Aberto em ${new Date(profile.lastOpenedAt).toLocaleString("pt-BR")}`
-                    : "Nunca aberto"}
-                </span>
-                <div className="flex gap-2">
-                  <Button variant="outline" disabled={busyId === profile.id} onClick={() => handleOpen(profile.id)}>
-                    Abrir
-                  </Button>
-                  <Button
-                    variant="outline"
-                    disabled={busyId === profile.id}
-                    onClick={() => handleOpenStudio(profile.id)}
-                  >
-                    YT Studio
-                  </Button>
-                  <Button variant="ghost" onClick={() => startEdit(profile)}>
-                    Editar
-                  </Button>
-                  <Button variant="ghost" onClick={() => handleDuplicate(profile)}>
-                    Duplicar
-                  </Button>
-                  <Button variant="destructive" onClick={() => handleDelete(profile)}>
-                    Remover
-                  </Button>
+              <CardContent className="flex flex-col gap-3">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>
+                    {profile.lastOpenedAt
+                      ? `Aberto em ${new Date(profile.lastOpenedAt).toLocaleString("pt-BR")}`
+                      : "Nunca aberto"}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      disabled={busyId === profile.id}
+                      onClick={() => handleOpen(profile.id)}
+                    >
+                      Abrir
+                    </Button>
+                    <Button
+                      variant="outline"
+                      disabled={busyId === profile.id}
+                      onClick={() => handleOpenStudio(profile.id)}
+                    >
+                      YT Studio
+                    </Button>
+                    <Button variant="ghost" onClick={() => startEdit(profile)}>
+                      Editar
+                    </Button>
+                    <Button variant="ghost" onClick={() => handleDuplicate(profile)}>
+                      Duplicar
+                    </Button>
+                    <Button variant="destructive" onClick={() => handleDelete(profile)}>
+                      Remover
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm">
+                  {youtubeAccount ? (
+                    <>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{youtubeAccount.channelTitle}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatCount(youtubeAccount.subscriberCount)} inscritos ·{" "}
+                          {formatCount(youtubeAccount.viewCount)} visualizacoes ·{" "}
+                          {formatCount(youtubeAccount.videoCount)} videos
+                          {youtubeAccount.recentViews48h !== null && (
+                            <> · {formatCount(youtubeAccount.recentViews48h)} views (48h, com atraso da API)</>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" disabled={youtubeBusy} onClick={() => handleRefreshYoutubeStats(profile)}>
+                          {youtubeBusy ? "..." : "Atualizar"}
+                        </Button>
+                        <Button variant="ghost" onClick={() => handleDisconnectYoutube(profile)}>
+                          Desconectar
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-muted-foreground">Nenhum canal do YouTube conectado</span>
+                      <Button variant="outline" disabled={youtubeBusy} onClick={() => handleConnectYoutube(profile)}>
+                        {youtubeBusy ? "Conectando..." : "Conectar YouTube"}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

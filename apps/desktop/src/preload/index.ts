@@ -1,6 +1,17 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { IpcChannels } from "@tubeanty/shared";
-import type { LaunchResult, Profile, ProfileInput, Proxy, ProxyInput, ProxyTestResult } from "@tubeanty/shared";
+import type {
+  GoogleOAuthConfig,
+  GoogleOAuthConfigInput,
+  LaunchResult,
+  Profile,
+  ProfileInput,
+  Proxy,
+  ProxyInput,
+  ProxyTestResult,
+  YoutubeAccount,
+  YoutubeConnectResult,
+} from "@tubeanty/shared";
 
 const api = {
   profiles: {
@@ -23,6 +34,21 @@ const api = {
       ipcRenderer.invoke(IpcChannels.proxies.test, id, input),
     rotateIp: (id: string): Promise<{ ok: boolean; error?: string }> =>
       ipcRenderer.invoke(IpcChannels.proxies.rotateIp, id),
+  },
+  settings: {
+    getGoogleOAuthConfig: (): Promise<GoogleOAuthConfig> =>
+      ipcRenderer.invoke(IpcChannels.settings.getGoogleOAuthConfig),
+    setGoogleOAuthConfig: (input: GoogleOAuthConfigInput): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.settings.setGoogleOAuthConfig, input),
+  },
+  youtube: {
+    getAccount: (profileId: string): Promise<YoutubeAccount | null> =>
+      ipcRenderer.invoke(IpcChannels.youtube.getAccount, profileId),
+    connect: (profileId: string): Promise<YoutubeConnectResult> =>
+      ipcRenderer.invoke(IpcChannels.youtube.connect, profileId),
+    disconnect: (profileId: string): Promise<void> => ipcRenderer.invoke(IpcChannels.youtube.disconnect, profileId),
+    refreshStats: (profileId: string): Promise<YoutubeConnectResult> =>
+      ipcRenderer.invoke(IpcChannels.youtube.refreshStats, profileId),
   },
 };
 

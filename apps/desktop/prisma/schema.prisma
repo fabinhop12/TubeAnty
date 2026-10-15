@@ -53,6 +53,38 @@ model Profile {
   notes          String?
   lastOpenedAt   DateTime?
   createdAt      DateTime  @default(now())
+  youtubeAccount YoutubeAccount?
 
   @@index([userId])
+}
+
+// Chave/segredo do OAuth Client (tipo "Desktop app") que o proprio usuario
+// cria no Google Cloud Console dele. Guardado uma unica vez, usado para
+// autorizar cada canal/perfil individualmente via OAuth.
+model AppSetting {
+  key   String @id
+  value String
+}
+
+// Um canal do YouTube autorizado via OAuth oficial (YouTube Data/Analytics
+// API) para um Profile. So existe apos o usuario completar o consentimento
+// OAuth na tela de login real do Google — nunca criado/escrito por scraping
+// ou qualquer outro meio.
+model YoutubeAccount {
+  id                  String    @id @default(cuid())
+  profileId           String    @unique
+  profile             Profile   @relation(fields: [profileId], references: [id])
+  channelId           String
+  channelTitle        String
+  accessTokenCipher   String
+  refreshTokenCipher  String
+  expiresAt           DateTime
+  scope               String
+  lastStatsAt         DateTime?
+  subscriberCount     Int?
+  viewCount           Int?
+  videoCount          Int?
+  recentViews48h      Int?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }

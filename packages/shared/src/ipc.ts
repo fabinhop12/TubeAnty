@@ -16,4 +16,14 @@ export const IpcChannels = {
     test: "proxies:test",
     rotateIp: "proxies:rotateIp",
   },
+  settings: {
+    getGoogleOAuthConfig: "settings:getGoogleOAuthConfig",
+    setGoogleOAuthConfig: "settings:setGoogleOAuthConfig",
+  },
+  youtube: {
+    connect: "youtube:connect",
+    disconnect: "youtube:disconnect",
+    getAccount: "youtube:getAccount",
+    refreshStats: "youtube:refreshStats",
+  },
 } as const;

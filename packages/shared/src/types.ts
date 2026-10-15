@@ -72,3 +72,38 @@ export interface LaunchResult {
   ok: boolean;
   error?: string;
 }
+
+export interface GoogleOAuthConfig {
+  clientId: string;
+  /** Nunca enviado ao renderer; presente so no payload de escrita. */
+  clientSecret?: string;
+  /** true se um client secret ja foi salvo (sem revelar o valor). */
+  hasClientSecret: boolean;
+}
+
+export interface GoogleOAuthConfigInput {
+  clientId: string;
+  clientSecret: string;
+}
+
+/**
+ * Estatisticas de canal disponiveis pela YouTube Data/Analytics API oficial.
+ * Status de monetizacao e alertas de strike NAO existem em nenhuma API
+ * publica do Google — nao e omissao, e indisponibilidade da plataforma.
+ */
+export interface YoutubeAccount {
+  profileId: string;
+  channelId: string;
+  channelTitle: string;
+  subscriberCount: number | null;
+  viewCount: number | null;
+  videoCount: number | null;
+  /** Visualizacoes nos ultimos ~2 dias via YouTube Analytics API; sujeito a atraso de processamento do lado do Google (nao e tempo real). */
+  recentViews48h: number | null;
+  lastStatsAt: string | null;
+}
+
+export interface YoutubeConnectResult {
+  ok: boolean;
+  error?: string;
+}
